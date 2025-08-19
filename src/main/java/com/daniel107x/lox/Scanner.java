@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.daniel107x.lox.TokenType.*;
+import static java.lang.Character.isDigit;
 
 public class Scanner {
     private final String source;
@@ -65,10 +66,45 @@ public class Scanner {
             case '\n':
                 line++;
                 break;
+            case '"':
+                string();
+                break;
             default:
-                Lox.error(line, "Unexpected character");
+                if(isDigit(c)) number();
+                else Lox.error(line, "Unexpected character");
                 break;
         }
+    }
+
+    private void number(){
+        while(isDigit(peek())) advance();
+        if(peek() == '.' && isDigit(peekNext())){
+            do advance();
+            while (isDigit(peek()));
+        }
+        String value = source.substring(start, current);
+        addToken(NUMBER, Double.parseDouble(value));
+    }
+
+    private char peekNext(){
+        if(current + 1 >= source.length()) return '\0';
+        return source.charAt(current + 1);
+    }
+
+    private void string(){
+        StringBuilder builder = new StringBuilder();
+        while(peek() != '"' && !isAtEnd()){
+            if(peek() == '\n') line++;
+            advance();
+        }
+        if(isAtEnd()){ // We reached the end without closing the string
+            Lox.error(line, "Unterminated string.");
+            return;
+        }
+        // This is not the end, so the next character should be "
+        advance();
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
     }
 
     private char advance(){

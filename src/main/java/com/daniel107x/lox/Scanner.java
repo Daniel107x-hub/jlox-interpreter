@@ -50,6 +50,13 @@ public class Scanner {
             case '>':
                 addToken(nextCharacterMatches('=') ? GREATER_EQUAL : GREATER);
                 break;
+            case '/':
+                // We check if the next character is a slash too, so in such case we are in front of a comment
+                // The comment is parsed until we reach an EOL or the EOF characters
+                // If this is not a comment, we just add the slash token
+                if(nextCharacterMatches('/')) while(peek() != '\n' && !isAtEnd()) advance();
+                else addToken(SLASH);
+                break;
             default:
                 Lox.error(line, "Unexpected character");
                 break;
@@ -74,6 +81,11 @@ public class Scanner {
         if(source.charAt(current) != expected) return false;
         current++;
         return true;
+    }
+
+    private char peek(){
+        if(isAtEnd()) return '\0';
+        return source.charAt(current);
     }
 
     private boolean isAtEnd(){

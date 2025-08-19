@@ -57,6 +57,14 @@ public class Scanner {
                 if(nextCharacterMatches('/')) while(peek() != '\n' && !isAtEnd()) advance();
                 else addToken(SLASH);
                 break;
+            case ' ':
+            case '\t':
+            case '\r':
+                // Ignore whitespaces
+                break;
+            case '\n':
+                line++;
+                break;
             default:
                 Lox.error(line, "Unexpected character");
                 break;

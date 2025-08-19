@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.daniel107x.lox.TokenType.*;
+import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
 
 public class Scanner {
@@ -71,9 +72,25 @@ public class Scanner {
                 break;
             default:
                 if(isDigit(c)) number();
+                else if(isAlpha(c)) identifier();
                 else Lox.error(line, "Unexpected character");
                 break;
         }
+    }
+
+    private void identifier(){
+        while(isAlphaNumeric(peek())) advance();
+        addToken(IDENTIFIER);
+    }
+
+    private boolean isAlpha(char c){
+        return (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    private boolean isAlphaNumeric(char c){
+        return isDigit(c) || isAlpha(c);
     }
 
     private void number(){

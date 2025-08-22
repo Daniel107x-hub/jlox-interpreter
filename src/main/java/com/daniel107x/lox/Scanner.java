@@ -81,6 +81,7 @@ public class Scanner {
                 // The comment is parsed until we reach an EOL or the EOF characters
                 // If this is not a comment, we just add the slash token
                 if(nextCharacterMatches('/')) while(peek() != '\n' && !isAtEnd()) advance();
+                else if(nextCharacterMatches('*')) blockComment();
                 else addToken(SLASH);
                 break;
             case ' ':
@@ -100,6 +101,30 @@ public class Scanner {
                 else Lox.error(line, "Unexpected character");
                 break;
         }
+    }
+
+    private void blockComment(){
+        int nestedCommentLevel = 1;
+        int lastCommentBlockLine = line;
+        while(!isAtEnd() && nestedCommentLevel > 0){
+            if(peek() == '/' && peekNext() == '*'){
+                nestedCommentLevel++;
+                lastCommentBlockLine = line;
+                advance();
+                advance();
+            }
+            else if(peek() == '*' && peekNext() == '/'){
+                nestedCommentLevel--;
+                advance();
+                advance();
+            }
+            else if(peek() == '\n'){
+                line++;
+                advance();
+            }
+            else advance();
+        }
+        if(nestedCommentLevel > 0) Lox.error(lastCommentBlockLine, "Comment was not closed.");
     }
 
     private void identifier(){
